@@ -8,12 +8,13 @@
 import RPi.GPIO as GPIO
 import time
 # PINs
-ledAlertPin = 15
+ledTemperatureAlertPin = 15
 buttonTemperaturePin = 7
 buttonHumidityPin = 8
-
+ledHumidityAlertPin = 17
 # Initial variables
-alert = True 
+temperatureAlert = False 
+humidityAlert = False
 prevTemperatureButtonState = True
 buttonTemperatureState = True
 prevHumidityButtonState = True
@@ -22,7 +23,8 @@ buttonHumidityState = True
 print("Setting Broadcom Mode")
 # Pin Setup:
 GPIO.setmode(GPIO.BCM) # Broadcom pin-numbering scheme
-GPIO.setup(ledAlertPin, GPIO.OUT) 
+GPIO.setup(ledTemperatureAlertPin, GPIO.OUT) 
+GPIO.setup(ledHumidityAlertPin, GPIO.OUT) 
 GPIO.setup(buttonTemperaturePin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(buttonHumidityPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 # Initial button state
@@ -33,8 +35,8 @@ buttonHumidityState = GPIO.input(buttonHumidityPin);
 print "Initial temperature state is ", 'pressed' if buttonHumidityState else 'released';
 
 # Initial led state
-GPIO.output(ledAlertPin, GPIO.LOW)
-
+GPIO.output(ledTemperatureAlertPin, GPIO.LOW)
+GPIO.output(ledHumidityAlertPin, GPIO.LOW)
 
 print("Here we go! Press CTRL+C to exit")
 try:
@@ -47,11 +49,17 @@ try:
             print "Button for humidity is ", 'pressed' if buttonHumidityState else 'released';
         # save last state
         prevTemperatureButtonState = buttonTemperatureState;
-        prevHumidityButtonState = buttonHumidityState;    
-        time.sleep(0.1) 
-        if alert:
-                print ("Threshold met, LED SHOULD BE ON");            
-                GPIO.output(ledAlertPin, GPIO.HIGH)
-
+        prevHumidityButtonState = buttonHumidityState;
+        if temperatureAlert:
+            print ("Threshold met for temperature, LED SHOULD BE ON");            
+            GPIO.output(ledTemperatureAlertPin, GPIO.HIGH)
+        if !temperatureAlert:
+            GPIO.output(ledTemperatureAlertPin, GPIO.LOW)
+        if humidityAlert:
+            print ("Threshold met for humidity, LED SHOULD BE ON");            
+            GPIO.output(ledHumidityAlertPin, GPIO.HIGH)
+        if !humidityAlert:
+            GPIO.output(ledHumidityAlertPin, GPIO.LOW)
+        time.sleep(1)
 except KeyboardInterrupt: # If CTRL+C is pressed, exit cleanly:
     GPIO.cleanup() # cleanup all GPIO
